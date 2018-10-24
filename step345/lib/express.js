@@ -1,14 +1,16 @@
 
 var url = require('url');
+var path = require('path');
+var fs = require('fs');
 
-
+/* step3 搭建 express 框架*/
 var express = function(){
 	var tasks = [];
 	/*return function(req,res){   }*/
 	var app = function(req,res){
 
 		makeQuery(req)
-        makeResponse(res)
+    makeResponse(res)
 
 		/*查看任务数组，执行*/
 		var i=0;
@@ -48,6 +50,9 @@ var express = function(){
 	return app;
 }
 
+
+
+
 /*req 加上 query 属性*/
 function makeQuery(req){
   req.query = url.parse(req.url,true).query; 
@@ -69,5 +74,29 @@ function makeResponse(res){
   }
 
 }
+/* step4: 1.express框架加上静态服务器 */
+
+express.static=function(staticPath){
+  return function(req,res,next){
+    var pathname = url.parse(req.url,true).pathname;
+    console.log(pathname)
+    if(pathname==='/'){
+      pathname+='index.html';
+    }
+    var filePath = path.join(staticPath,pathname.substr(1));
+    fs.readFile(filePath,'binary',function(err,content){
+      if(err){
+       /* res.writeHead(404,'not found -_-!');
+        res.end('not found -_-!');*/
+        next();
+      }else{
+        res.writeHead(200,'ok~');
+        res.end(content,"binary")
+      }
+    })
+  }
+}
+
+
 
 module.exports = express;
