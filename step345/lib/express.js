@@ -2,6 +2,7 @@
 var url = require('url');
 var path = require('path');
 var fs = require('fs');
+var ejs = require('ejs');  /*step5  模板引擎*/
 
 /* step3 搭建 express 框架*/
 var express = function(){
@@ -9,8 +10,9 @@ var express = function(){
 	/*return function(req,res){   }*/
 	var app = function(req,res){
 
-		makeQuery(req)
-    makeResponse(res)
+		makeQuery(req);
+    makeResponse(res);
+    addRender(req,res,app);
 
 		/*查看任务数组，执行*/
 		var i=0;
@@ -46,6 +48,16 @@ var express = function(){
     	})
 
     }
+
+  app.data = {};
+  app.set = function(key,value){
+    app.data[key]=value;
+  }
+  app.get = function(key){
+    return app.data[key];
+  }
+
+
 
 	return app;
 }
@@ -98,5 +110,28 @@ express.static=function(staticPath){
 }
 
 
+/*step5 模板引擎*/
+
+function addRender(req,res,app){
+   
+   res.render=function(tplPath,data){
+console.log(app.get('view'));
+    var fullPath = path.join(app.get('view'),tplPath);
+    
+   /*fullPath 模板文件的位置， data 要转换文件的内容 str 转换结果*/
+    ejs.renderFile(fullPath, data, {}, function(err, str){
+      if(err){
+         res.writeHead(503,'System error');
+         res.end();
+      }else{
+
+         res.setHeader('content-type', 'text/html')
+         res.writeHead(200, 'Ok')
+         res.write(str)
+        res.end() 
+      }
+     });
+   }
+  }
 
 module.exports = express;

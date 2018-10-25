@@ -5,7 +5,7 @@ var parseBody = function(req,res,next){
    	body+=chunk;
    }).on('end',function(){
    	req.body=bodyParse(body);
-   	console.log(req.body)
+  
    })
     next();
 }
